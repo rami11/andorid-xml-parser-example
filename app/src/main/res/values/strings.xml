@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">XML Parser</string>
+
+    <string name="page_title">Football Clubs (Title)</string>
+    <string name="updated">Updated</string>
+    <string name="connection_error">Connection error</string>
+    <string name="xml_error">XML error</string>
+</resources>
