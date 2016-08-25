@@ -19,24 +19,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
-import java.util.jar.Pack200;
 
 /**
  * Created by rsn on 24/08/16.
  */
 public class NetworkActivity extends Activity {
-    /*public static final String WIFI  = "Wi-Fi";
-    public static final String ANY = "Any";*/
     private static final String URL = Environment.getExternalStorageDirectory().toString() + "/example.xml";
     private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 100;
-
-    /*// Whether there is a Wi-Fi connection.
-    private static boolean wifiConnected = false;
-    // Whether there is a mobile connection.
-    private static boolean mobileConnected = false;
-    // Whether the display should be refreshed.
-    public static boolean refreshDisplay = true;
-    public static String sPref = "";*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +48,7 @@ public class NetworkActivity extends Activity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     new DownloadXmlTask().execute(URL);
                 } else {
-                    // permission denied: disable the functionality that depends on this persmission
+                    // permission denied: disable the functionality that depends on this permission
                 }
                 break;
         }
@@ -129,11 +118,7 @@ public class NetworkActivity extends Activity {
                 fileInputStream = new FileInputStream(file);
             } catch (IOException e) {
                 e.printStackTrace();
-            } /*finally {
-                if (fileInputStream != null) {
-                    fileInputStream.close();
-                }
-            }*/
+            }
 
             return  fileInputStream;
         }
