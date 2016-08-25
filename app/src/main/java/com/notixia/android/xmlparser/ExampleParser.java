@@ -72,7 +72,7 @@ public class ExampleParser {
             String parserName = parser.getName();
             if (parserName.equals("name")) {
                 name = readName(parser);
-            } else if (name.equals("link")) {
+            } else if (parserName.equals("link")) {
                 link = readLink(parser);
             } else {
                 skip(parser);
