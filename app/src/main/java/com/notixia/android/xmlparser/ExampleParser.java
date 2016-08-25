@@ -39,7 +39,7 @@ public class ExampleParser {
             }
             String name = parser.getName();
             // Starts by looking for the 'Club' tag
-            if (name.equals("Club")) {
+            if (name.equals("club")) {
                 clubs.add(readClub(parser));
             } else {
                 skip(parser);

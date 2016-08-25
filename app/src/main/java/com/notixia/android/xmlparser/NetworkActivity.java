@@ -1,72 +1,75 @@
 package com.notixia.android.xmlparser;
 
 import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.webkit.WebView;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.jar.Pack200;
 
 /**
  * Created by rsn on 24/08/16.
  */
 public class NetworkActivity extends Activity {
-    public static final String WIFI  = "Wi-Fi";
-    public static final String ANY = "Any";
-    private static final String URL = "file:///home/rsn/Desktop/example.xml";
+    /*public static final String WIFI  = "Wi-Fi";
+    public static final String ANY = "Any";*/
+    private static final String URL = Environment.getExternalStorageDirectory().toString() + "/example.xml";
+    private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 100;
 
-    // Whether there is a Wi-Fi connection.
+    /*// Whether there is a Wi-Fi connection.
     private static boolean wifiConnected = false;
     // Whether there is a mobile connection.
     private static boolean mobileConnected = false;
     // Whether the display should be refreshed.
     public static boolean refreshDisplay = true;
-    public static String sPref = "";
+    public static String sPref = "";*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        /*setContentView(R.layout.activity_main);*/
 
-        /*new DownloadXmlTask().execute(URL);
+        int permissionCheck = ContextCompat.checkSelfPermission(NetworkActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
-        if((sPref.equals(ANY)) && (wifiConnected || mobileConnected)) {
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(NetworkActivity.this, new String[] {android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+        } else {
             new DownloadXmlTask().execute(URL);
         }
-        else if ((sPref.equals(WIFI)) && (wifiConnected)) {
-            new DownloadXmlTask().execute(URL);
-        } else {
-            // show error
-        }*/
     }
 
-    // Uses AsyncTask to download the XML feed from localhost
-    /*public void loadPage() {
-        if((sPref.equals(ANY)) && (wifiConnected || mobileConnected)) {
-            new DownloadXmlTask().execute(URL);
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch(requestCode) {
+            case PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    new DownloadXmlTask().execute(URL);
+                } else {
+                    // permission denied: disable the functionality that depends on this persmission
+                }
+                break;
         }
-        else if ((sPref.equals(WIFI)) && (wifiConnected)) {
-            new DownloadXmlTask().execute(URL);
-        } else {
-            // show error
-        }
-    }*/
-
+    }
 
     public class DownloadXmlTask extends AsyncTask<String, Void, String> {
         @Override
-        protected String doInBackground(String... urls) {
+        protected String doInBackground(String... params) {
             try {
-                return loadXmlFromNetwork(urls[0]);
+                return loadXmlFromFileSystem(params[0]);
             } catch (IOException e) {
                 return getResources().getString(R.string.connection_error);
             } catch (XmlPullParserException e) {
@@ -78,11 +81,11 @@ public class NetworkActivity extends Activity {
         protected void onPostExecute(String result) {
             setContentView(R.layout.activity_main);
             // Displays the HTML string in the UI via a WebView
-            WebView myWebView = (WebView) findViewById(R.id.webView);
-            myWebView.loadData(result, "text/html", null);
+            WebView webView = (WebView) findViewById(R.id.webView);
+            webView.loadData(result, "text/html", null);
         }
 
-        private String loadXmlFromNetwork(String urlString) throws XmlPullParserException, IOException {
+        private String loadXmlFromFileSystem(String path) throws XmlPullParserException, IOException {
             InputStream stream = null;
             // Instantiate the parser
             ExampleParser exampleParser = new ExampleParser();
@@ -97,7 +100,7 @@ public class NetworkActivity extends Activity {
             htmlString.append("<em>" + getResources().getString(R.string.updated) + " " + formatter.format(rightNow.getTime()) + "</em>");
 
             try {
-                stream = downloadUrl(urlString);
+                stream = getFileInputStream(path);
                 clubs = exampleParser.parse(stream);
                 // Makes sure that the InputStream is closed after the app is
                 // finished using it.
@@ -117,16 +120,22 @@ public class NetworkActivity extends Activity {
 
         // Given a string representation of a URL, sets up a connection and get
         // an input stream.
-        private InputStream downloadUrl(String urlString) throws IOException {
-            java.net.URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(1000);
-            conn.setConnectTimeout(15000);
-            conn.setRequestMethod("GET");
-            conn.setDoInput(true);
-            // Starts the query
-            conn.connect();
-            return conn.getInputStream();
+        private FileInputStream getFileInputStream(String path) throws IOException {
+            File file = new File(path);
+
+            FileInputStream fileInputStream = null;
+
+            try {
+                fileInputStream = new FileInputStream(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } /*finally {
+                if (fileInputStream != null) {
+                    fileInputStream.close();
+                }
+            }*/
+
+            return  fileInputStream;
         }
     }
 }
